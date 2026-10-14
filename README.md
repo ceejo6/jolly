@@ -2,6 +2,9 @@
 
 > A minimalist, air-gapped, self-hosted media ecosystem and control plane engineered for rapid deployment, zero operational bloat, and total data sovereignty.
 
+> 📖 **First time setting up on physical hardware?**  
+> Check out the step-by-step walkthrough in [**jolly_instructions.txt**](jolly_instructions.txt) for a copy-paste deployment guide optimized for bare-metal Ubuntu 24.04 Server.
+
 ---
 
 ## 1. Vision & Architecture
@@ -151,12 +154,18 @@ Run all certified milestone regression harnesses on the host at any time:
 
 ## Bare-Metal Physical Host Deployment
 
-To deploy Project Jolly to a dedicated physical Ubuntu 24.04 server (Intel i5-8400, UHD 630):
+For a detailed step-by-step guide with command-line instructions, IP lookup, and browser setup, refer directly to [**jolly_instructions.txt**](jolly_instructions.txt).
+
+### Quick Deployment
 
 ```bash
-# 1. Clone repository on target host
-git clone [https://github.com/ceejo6/jolly.git](https://github.com/ceejo6/jolly.git) /opt/jolly
+# 1. Clone repository to standard appliance root
+sudo git clone [https://github.com/ceejo6/jolly.git](https://github.com/ceejo6/jolly.git) /opt/jolly
 cd /opt/jolly
 
-# 2. Run the automated installer with root privileges
+# 2. Configure environment keys (optional for local-only use)
+sudo cp .env.example .env
+sudo nano .env
+
+# 3. Run the automated installer with root privileges
 sudo ./install.sh
