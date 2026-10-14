@@ -1,0 +1,183 @@
+==============================================================================
+             Jolly: First-Time Setup & Deployment Guide 🍿
+==============================================================================
+
+This guide walks you through setting up and running Jolly on a dedicated
+physical machine running Ubuntu 24.04 Server.
+
+Follow these steps in order.
+
+
+------------------------------------------------------------------------------
+Prerequisites Checklist
+------------------------------------------------------------------------------
+
+Before you start, make sure you have:
+1. A physical computer with Ubuntu 24.04 LTS Server installed.
+2. An active internet connection connected via Ethernet.
+3. Access to the command line (either directly via keyboard/monitor on the
+   machine or over SSH).
+
+
+------------------------------------------------------------------------------
+Step 1: Find Your Server's IP Address
+------------------------------------------------------------------------------
+
+You will need your server's local IP address to access the dashboard from
+your phone, laptop, or smart TV later.
+
+Copy the command below, paste it into your terminal, and press Enter:
+
+----------
+hostname -I | awk '{print $1}'
+----------
+
+Write the resulting number down.
+It usually looks something like 192.168.1.150 or 10.0.0.45.
+This is your Server IP.
+
+
+------------------------------------------------------------------------------
+Step 2: Download the Code & Configure Settings
+------------------------------------------------------------------------------
+
+Copy the commands below, paste them into your terminal, and press Enter:
+
+----------
+sudo git clone https://github.com/ceejo6/jolly.git /opt/jolly
+cd /opt/jolly
+sudo cp .env.example .env
+sudo nano .env
+----------
+
+Editing Your Settings File (.env):
+- The terminal will open the text editor nano.
+- If you are testing locally without remote access right now, you do not
+  need to change anything.
+- If you have a Tailscale Auth Key or a Cloudflare Tunnel Token, replace the
+  placeholder values on the matching lines.
+
+To save and exit nano:
+1. Press Ctrl + O on your keyboard, then hit Enter to save.
+2. Press Ctrl + X to exit back to the command prompt.
+
+
+------------------------------------------------------------------------------
+Step 3: Run the Automated Installer
+------------------------------------------------------------------------------
+
+Run the installer with root privileges. Copy the command below, paste it
+into your terminal, and press Enter:
+
+----------
+sudo ./install.sh
+----------
+
+What this does automatically:
+- Installs the official Docker Engine and Compose plugins.
+- Sets up the internal folder structure and permissions for hardware
+  acceleration (Intel Quick Sync).
+- Connects the system to systemd so the server will automatically turn itself
+  on and start playing if the physical computer restarts or loses power.
+- Runs automated tests to ensure all systems are operating correctly.
+
+When the installer finishes, it will print:
+
+PASS
+==============================================================================
+Project Jolly v1.0 Production Appliance deployed successfully!
+Server will now automatically boot on physical host power-on.
+==============================================================================
+
+
+------------------------------------------------------------------------------
+Step 4: Open Jellyfin in Your Web Browser
+------------------------------------------------------------------------------
+
+Once the installer finishes, leave the server alone. Go to your personal
+computer, laptop, or phone connected to the same home Wi-Fi/network.
+
+1. Open your web browser (Chrome, Edge, Safari, Firefox).
+2. In the address bar, type your Server IP followed by port :8096.
+   For example:
+   http://192.168.1.150:8096
+   (Replace 192.168.1.150 with the actual IP address you noted in Step 1).
+
+3. The Jellyfin Setup Wizard will appear:
+   - Language: Choose your preferred language, click Next.
+   - User Account: Choose your private admin Username and Password, click Next.
+   - Media Libraries:
+     * Click Add Media Library.
+     * Set Content type to Movies.
+     * Click the + icon next to Folders and select /media/movies.
+     * Check Nfo under Metadata Savers.
+     * Check Save artwork into media folders.
+     * Click OK.
+     * (Optional): Add another library for TV shows pointing to /media/tv.
+   - Language Settings: Click Next.
+   - Remote Access: Leave "Allow remote connections" checked, but uncheck
+     "Enable automatic port mapping (UPnP)".
+   - Click Finish.
+
+Log in with your newly created username and password. You will see the
+default library ready to go.
+
+
+------------------------------------------------------------------------------
+Step 5: How to Add Movies and Shows
+------------------------------------------------------------------------------
+
+To add real media to your server, place video files in their respective
+folders on the server:
+
+Movies:   /opt/jolly/data/media/movies/
+TV Shows: /opt/jolly/data/media/tv/
+
+Recommended Folder Structure:
+/opt/jolly/data/media/
+├── movies/
+│   └── Interstellar (2014)/
+│       └── Interstellar (2014).mkv
+└── tv/
+    └── Breaking Bad (2008)/
+        └── Season 01/
+            ├── Breaking Bad - S01E01.mkv
+            └── Breaking Bad - S01E02.mkv
+
+Once files are placed in these folders:
+1. Open your Jellyfin web interface.
+2. Click the hamburger menu icon in the top-left -> Dashboard.
+3. Under your libraries, click the three dots on Movies -> Scan Library.
+4. Your movies will appear on all connected client devices immediately.
+
+
+------------------------------------------------------------------------------
+Useful Day-to-Day Commands
+------------------------------------------------------------------------------
+
+All commands should be run from inside /opt/jolly:
+
+Check server health and service status:
+----------
+sudo systemctl status jolly.service
+----------
+
+Restart the media stack:
+----------
+sudo systemctl restart jolly.service
+----------
+
+Stop the media stack:
+----------
+sudo systemctl stop jolly.service
+----------
+
+View live system logs:
+----------
+sudo docker compose logs -f
+----------
+
+Run the full system health and regression test:
+----------
+sudo ./scripts/test-1.0.sh
+----------
