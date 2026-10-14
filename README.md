@@ -59,3 +59,27 @@ To run regression tests on the host:
 
 # Verify offline media engine
 ./scripts/test-0.2.sh
+
+---
+
+## Milestone 0.3: Rails 8 & Solid Stack Engine
+
+* **Status:** `FROZEN & VERIFIED` (Tag: `v0.3`)
+* **Harness:** `scripts/test-0.3.sh`
+
+### Accomplishments
+* Replaced temporary Nginx stub with production Rails 8 API engine powered by Puma.
+* Established multi-database SQLite layout in Write-Ahead Logging (WAL) mode targeting `./data/rails/storage`.
+* Integrated full **Solid Suite** (`solid_cache`, `solid_queue`, `solid_cable`), removing all Redis and external queuing dependencies.
+* Certified native `GET /up` Puma health check and multi-stage container build.
+
+---
+
+## Complete Regression Suite
+
+Run all certified milestone regression harnesses on the host at any time:
+
+bash
+./scripts/test-0.1.sh  # Baseline container runtime
+./scripts/test-0.2.sh  # Jellyfin media layer & air-gap persistence
+./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine

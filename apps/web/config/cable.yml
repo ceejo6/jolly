@@ -1,0 +1,11 @@
+default: &default
+  adapter: solid_cable
+
+development:
+  <<: *default
+
+test:
+  adapter: test
+
+production:
+  <<: *default
