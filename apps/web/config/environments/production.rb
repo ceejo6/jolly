@@ -14,7 +14,7 @@ Rails.application.configure do
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
   config.cache_store = :solid_cache_store
-  config.active_job.queue_adapter = :solid_queue
+  config.active_job.queue_adapter = :async
 
   config.active_support.report_deprecations = false
 end

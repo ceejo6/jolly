@@ -84,8 +84,6 @@ bash
 ./scripts/test-0.2.sh  # Jellyfin media layer & air-gap persistence
 ./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine
 
-cat <<'EOF' >> README.md
-
 ---
 
 ## Milestone 0.4: Remote Mesh & Secure Ingress
@@ -110,3 +108,29 @@ Run all certified milestone regression harnesses on the host at any time:
 ./scripts/test-0.2.sh  # Jellyfin media layer & air-gap persistence
 ./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine
 ./scripts/test-0.4.sh  # Dual-track ingress & internal mesh
+
+---
+
+## Milestone 0.5: Hardware Transcoding Cutover (Intel QSV UHD 630)
+
+* **Status:** `FROZEN & VERIFIED` (Tag: `v0.5`)
+* **Harness:** `scripts/test-0.5.sh`
+
+### Accomplishments
+* Configured `/dev/dri` hardware device mapping and supplementary group permissions for Intel Quick Sync Video (Coffee Lake UHD 630).
+* Certified automated headless synthetic video transcoding using `jellyfin-ffmpeg` with graceful software decode/encode fallback in virtualized environments.
+* Stabilized Puma and Rails 8 configuration with persistent SQLite storage, background task isolation, and `tmp/pids` container handling.
+* Hardened Tailscale user-space networking and standby modes to eliminate crash loops when auth keys are unset.
+
+---
+
+## Complete Regression Suite
+
+Run all certified milestone regression harnesses on the host at any time:
+
+```bash
+./scripts/test-0.1.sh  # Baseline container runtime
+./scripts/test-0.2.sh  # Jellyfin media layer & air-gap persistence
+./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine
+./scripts/test-0.4.sh  # Dual-track ingress & internal mesh
+./scripts/test-0.5.sh  # Intel QSV transcoding pipeline

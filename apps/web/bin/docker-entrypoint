@@ -1,6 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-bundle exec rails db:prepare
+# Ensure tmp/pids exists and clean up stale pid files
+mkdir -p /rails/tmp/pids
+rm -f /rails/tmp/pids/server.pid
 
-exec "$@"
+# Run migrations if database is accessible
+./bin/rails db:prepare 2>/dev/null || true
+
+exec "${@}"

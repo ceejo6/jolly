@@ -11,7 +11,7 @@ services:
       - RAILS_ENV=production
       - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - SOLID_QUEUE_IN_PUMA=true
+      - SOLID_QUEUE_IN_PUMA=false
       - PORT=3000
     volumes:
       - ./data/rails/storage:/rails/storage
@@ -65,6 +65,14 @@ services:
       - TS_AUTHKEY=${TAILSCALE_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=true
+    entrypoint: >
+      /bin/sh -c "
+      if [ -z \"$$TS_AUTHKEY\" ] || [ \"$$TS_AUTHKEY\" = \"placeholder_tailscale_authkey\" ]; then
+        echo 'INFO: No production Tailscale auth key provided. Starting tailscaled in standby mode.';
+        exec tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking;
+      else
+        exec /usr/local/bin/containerboot;
+      fi"
     volumes:
       - ./data/tailscale:/var/lib/tailscale
     networks:

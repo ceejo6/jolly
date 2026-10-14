@@ -1,7 +1,10 @@
 threads_count = ENV.fetch("RAILS_MAX_THREADS", 5)
 threads threads_count, threads_count
 
-bind "tcp://0.0.0.0:#{ENV.fetch('PORT', 3000)}"
-environment ENV.fetch("RAILS_ENV", "production")
+port ENV.fetch("PORT", 3000), "0.0.0.0"
 
-plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"] == "true"
+environment ENV.fetch("RAILS_ENV") { "production" }
+
+pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
+
+plugin :tmp_restart
