@@ -1,0 +1,55 @@
+services:
+  rails:
+    image: nginx:alpine
+    container_name: jolly_rails
+    restart: unless-stopped
+    ports:
+      - "${RAILS_PORT}:80"
+    volumes:
+      - ./data/rails/storage:/rails/storage
+    command: >
+      /bin/sh -c "mkdir -p /usr/share/nginx/html &&
+      echo 'OK' > /usr/share/nginx/html/up &&
+      nginx -g 'daemon off;'"
+    networks:
+      - jolly_network
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jolly_jellyfin
+    restart: unless-stopped
+    ports:
+      - "${JELLYFIN_PORT}:8096"
+      - "${JELLYFIN_DISCOVERY_PORT}:7359/udp"
+
+    volumes:
+      - ./data/jellyfin/config:/config
+      - ./data/jellyfin/cache:/cache
+      - ./data/media:/media
+    networks:
+      - jolly_network
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: jolly_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - jolly_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  jolly_network:
+    name: jolly_network
+    driver: bridge
