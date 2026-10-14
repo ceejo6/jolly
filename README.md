@@ -134,3 +134,29 @@ Run all certified milestone regression harnesses on the host at any time:
 ./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine
 ./scripts/test-0.4.sh  # Dual-track ingress & internal mesh
 ./scripts/test-0.5.sh  # Intel QSV transcoding pipeline
+
+---
+
+## Milestone 1.0: Unified Production Bare-Metal Release
+
+* **Status:** `FROZEN & VERIFIED` (Tag: `v1.0`)
+* **Master Harness:** `scripts/test-1.0.sh`
+
+### Accomplishments
+* Built unified zero-touch bare-metal installer (`install.sh`) for automated deployment on Ubuntu 24.04 Server.
+* Integrated systemd unit (`jolly.service`) providing OS-level daemon orchestration, auto-boot on physical host power-on, and clean SQLite transaction flushing on host shutdown.
+* Established master acceptance test suite validating installation scripts, systemd configurations, mount permissions, and cumulative multi-version regressions.
+
+---
+
+## Bare-Metal Physical Host Deployment
+
+To deploy Project Jolly to a dedicated physical Ubuntu 24.04 server (Intel i5-8400, UHD 630):
+
+```bash
+# 1. Clone repository on target host
+git clone [https://github.com/ceejo6/jolly.git](https://github.com/ceejo6/jolly.git) /opt/jolly
+cd /opt/jolly
+
+# 2. Run the automated installer with root privileges
+sudo ./install.sh
