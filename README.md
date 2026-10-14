@@ -83,3 +83,30 @@ bash
 ./scripts/test-0.1.sh  # Baseline container runtime
 ./scripts/test-0.2.sh  # Jellyfin media layer & air-gap persistence
 ./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine
+
+cat <<'EOF' >> README.md
+
+---
+
+## Milestone 0.4: Remote Mesh & Secure Ingress
+
+* **Status:** `FROZEN & VERIFIED` (Tag: `v0.4`)
+* **Harness:** `scripts/test-0.4.sh`
+
+### Accomplishments
+* Architected dual-track ingress: Tailscale WireGuard mesh for high-throughput media streaming and Cloudflare Tunnel for edge-authenticated web traffic.
+* Enforced token resilience: `jolly_tunnel` and `jolly_tailscale` operate in graceful standby during local/offline testing without crash looping.
+* Validated internal bridge DNS resolution and container-to-container reachability over `jolly_network`.
+* Confirmed zero regressions across baseline orchestration, media engine, and Rails 8 runtime.
+
+---
+
+## Complete Regression Suite
+
+Run all certified milestone regression harnesses on the host at any time:
+
+```bash
+./scripts/test-0.1.sh  # Baseline container runtime
+./scripts/test-0.2.sh  # Jellyfin media layer & air-gap persistence
+./scripts/test-0.3.sh  # Rails 8 & Solid Stack engine
+./scripts/test-0.4.sh  # Dual-track ingress & internal mesh

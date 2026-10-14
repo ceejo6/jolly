@@ -10,12 +10,15 @@ services:
     environment:
       - RAILS_ENV=production
       - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
       - SOLID_QUEUE_IN_PUMA=true
       - PORT=3000
     volumes:
       - ./data/rails/storage:/rails/storage
     networks:
-      - jolly_network
+      jolly_network:
+        aliases:
+          - rails
     deploy:
       resources:
         limits:
@@ -33,7 +36,9 @@ services:
       - ./data/jellyfin/cache:/cache
       - ./data/media:/media
     networks:
-      - jolly_network
+      jolly_network:
+        aliases:
+          - jellyfin
     deploy:
       resources:
         limits:
@@ -42,8 +47,26 @@ services:
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: jolly_tunnel
+    restart: "no"
+    command: version
+    networks:
+      - jolly_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  tailscale:
+    image: tailscale/tailscale:stable
+    container_name: jolly_tailscale
+    hostname: ${TAILSCALE_HOSTNAME}
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    environment:
+      - TS_AUTHKEY=${TAILSCALE_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=true
+    volumes:
+      - ./data/tailscale:/var/lib/tailscale
     networks:
       - jolly_network
     deploy:
