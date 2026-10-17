@@ -31,7 +31,8 @@ run_check "Installer script syntax check" bash -n "install.sh"
 verify_systemd_unit() {
   grep -Eq '^ExecStart=' jolly.service || { echo "Missing ExecStart directive"; return 1; }
   grep -Eq '^ExecStop=' jolly.service || { echo "Missing ExecStop directive"; return 1; }
-  grep -Eq '^Restart=always' jolly.service || { echo "Missing Restart=always directive"; return 1; }
+  grep -Eq '^Type=oneshot' jolly.service || { echo "Missing Type=oneshot directive"; return 1; }
+  grep -Eq '^RemainAfterExit=yes' jolly.service || { echo "Missing RemainAfterExit directive"; return 1; }
   return 0
 }
 run_check "Systemd unit specification matches Contract 1.0" verify_systemd_unit
