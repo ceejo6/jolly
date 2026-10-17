@@ -82,11 +82,12 @@ curl -fsSL https://raw.githubusercontent.com/ceejo6/jolly/main/install.sh | sudo
 
 What this command does automatically:
 1. Installs Git, Docker Engine, and Compose plugins.
-2. Clones Project Jolly directly to /opt/jolly.
-3. Configures hardware acceleration for Intel Quick Sync Video.
-4. Connects systemd (jolly.service) so the server auto-boots on power loss.
-5. Runs the complete test harness to verify health.
-6. Prints the exact browser URL to open on your phone or laptop.
+2. Installs and configures Samba for Windows drag-and-drop media sharing.
+3. Clones Project Jolly directly to /opt/jolly.
+4. Configures hardware acceleration for Intel Quick Sync Video.
+5. Connects systemd (jolly.service) so the server auto-boots on power loss.
+6. Runs the complete test harness to verify health.
+7. Prints your web streaming link and Windows network share path.
 
 
 ------------------------------------------------------------------------------
@@ -112,28 +113,26 @@ Example: http://192.168.1.150:8096
 
 
 ------------------------------------------------------------------------------
-How to Add Real Movies and TV Shows
+Phase 5: How to Add Movies and Shows from Windows (Drag & Drop)
 ------------------------------------------------------------------------------
 
-Place video files in their respective folders on the server:
+You do not need to use the terminal to upload videos. You can drag and drop
+files directly from your Windows desktop or laptop:
 
-Movies:   /opt/jolly/data/media/movies/
-TV Shows: /opt/jolly/data/media/tv/
+1. On your Windows PC, press the keyboard shortcut: Win + R
+2. Type your server's network address and hit Enter:
+   \\<server-ip>\JollyMedia
+   (Example: \\192.168.1.150\JollyMedia)
 
-Example Folder Structure:
-/opt/jolly/data/media/
-├── movies/
-│   └── Interstellar (2014)/
-│       └── Interstellar (2014).mkv
-└── tv/
-    └── Breaking Bad (2008)/
-        └── Season 01/
-            ├── Breaking Bad - S01E01.mkv
-            └── Breaking Bad - S01E02.mkv
+3. A Windows folder will open displaying "movies" and "tv".
+4. Drag and drop any movie into the "movies" folder.
+   Recommended format:
+   movies\Interstellar (2014)\Interstellar (2014).mkv
 
-To refresh your library:
-In your Jellyfin web interface, open Dashboard -> Libraries -> click the
-three dots on Movies -> Scan Library.
+5. Refresh your library:
+   In your Jellyfin web interface (http://<server-ip>:8096), go to:
+   Dashboard -> Libraries -> click the three dots on Movies -> Scan Library.
+   The movie will appear on your phone, PC, and TV immediately.
 
 
 ------------------------------------------------------------------------------

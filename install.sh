@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 # ==============================================================================
-# PROJECT JOLLY: UNIFIED ZERO-TOUCH APPLIANCE BOOTSTRAP (v1.0.1)
+# PROJECT JOLLY: UNIFIED ZERO-TOUCH APPLIANCE BOOTSTRAP (v1.0.3)
 # ==============================================================================
 
 if [[ $EUID -ne 0 ]]; then
@@ -15,7 +15,7 @@ REPO_URL="https://github.com/ceejo6/jolly.git"
 
 echo "==> Step 1: Installing Base System Packages..."
 apt-get update -qq
-apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release git
+apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release git samba
 
 # Install Docker Engine and Compose Plugin if missing
 if ! command -v docker >/dev/null 2>&1; then
@@ -31,7 +31,7 @@ if ! command -v docker >/dev/null 2>&1; then
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 fi
 
-echo "==> Step 2: Preparing Appliance Directory..."
+echo "==> Step 2: Preparing Appliance Directory & Storage Hierarchy..."
 if [[ ! -d "$TARGET_DIR/.git" ]]; then
   echo "==> Cloning Project Jolly into $TARGET_DIR..."
   git clone "$REPO_URL" "$TARGET_DIR"
@@ -55,6 +55,24 @@ mkdir -p "$TARGET_DIR/data/rails/storage" \
 
 chmod -R 777 "$TARGET_DIR/data"
 
+# Configure native Windows Network Share (Samba)
+if ! grep -q "\[JollyMedia\]" /etc/samba/smb.conf; then
+  echo "==> Configuring Windows Network Share (Samba)..."
+  cat <<'SMB' >> /etc/samba/smb.conf
+
+[JollyMedia]
+   path = /opt/jolly/data/media
+   browseable = yes
+   read only = no
+   guest ok = yes
+   create mask = 0777
+   directory mask = 0777
+   force user = root
+SMB
+  systemctl restart smbd
+  systemctl enable smbd
+fi
+
 echo "==> Step 3: Configuring OS Daemon (systemd)..."
 cp "$TARGET_DIR/jolly.service" /etc/systemd/system/jolly.service
 sed -i "s|WorkingDirectory=.*|WorkingDirectory=$TARGET_DIR|g" /etc/systemd/system/jolly.service
@@ -74,6 +92,9 @@ echo "==========================================================================
 echo "Project Jolly Appliance deployed successfully!"
 echo "Server will automatically start on physical host power-on."
 echo ""
-echo "Access your media server right now by visiting:"
-echo "http://${SERVER_IP}:8096"
+echo "1. Access your web streaming dashboard:"
+echo "   http://${SERVER_IP}:8096"
+echo ""
+echo "2. Add movies and TV shows from any Windows PC (File Explorer / Run):"
+echo "   \\\\${SERVER_IP}\\JollyMedia"
 echo "=============================================================================="
