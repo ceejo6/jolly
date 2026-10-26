@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
 
 MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
 
