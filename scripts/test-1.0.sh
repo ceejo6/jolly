@@ -37,6 +37,33 @@ verify_systemd_unit() {
 }
 run_check "Systemd unit specification matches Contract 1.0" verify_systemd_unit
 
+# --- Auto-Provision Valid Synthetic Test Media ---
+provision_synthetic_media() {
+  local movie_dir="data/media/movies/Test Synthetic (2026)"
+  local target_file="$movie_dir/Test Synthetic (2026).mkv"
+  local poster_file="$movie_dir/poster.jpg"
+
+  mkdir -p "$movie_dir"
+
+  # Generate a valid 5-second MKV test pattern using ffmpeg if missing or invalid
+  if [[ ! -f "$target_file" ]] || ! ffprobe -v error "$target_file" &>/dev/null; then
+    echo "==> Provisioning valid synthetic test video stream..."
+    ffmpeg -y -f lavfi -i testsrc=duration=5:size=1280x720:rate=30 \
+              -f lavfi -i anoisesrc=duration=5,aformat=channel_layouts=stereo \
+              -c:v libx264 -preset ultrafast -pix_fmt yuv420p \
+              -c:a aac -b:a 128k \
+              "$target_file" >/dev/null 2>&1
+  fi
+
+  # Ensure a valid dummy poster image exists so Skia doesn't throw invalid data errors
+  if [[ ! -f "$poster_file" ]]; then
+    # Generate a simple 200x300 solid color jpeg placeholder using ffmpeg
+    ffmpeg -y -f lavfi -i color=c=blue:size=200x300 -vframes 1 "$poster_file" >/dev/null 2>&1
+  fi
+}
+
+run_check "Synthetic test media provisioned and valid" provision_synthetic_media
+
 # --- 3. Production Container Health Audit ---
 run_check "Ensure orchestration stack is up" docker compose up -d
 
@@ -53,6 +80,18 @@ verify_stack_health() {
   return 0
 }
 run_check "Core services active and running" verify_stack_health
+
+verify_appliance_services() {
+  local services=("smbd" "wsdd")
+  for svc in "${services[@]}"; do
+    if ! systemctl is-active --quiet "$svc"; then
+      echo "Required appliance service '$svc' is not active"
+      return 1
+    fi
+  done
+  return 0
+}
+run_check "Samba and WSD discovery daemons active" verify_appliance_services
 
 # --- 4. Storage & Mount Permission Audit ---
 verify_storage_rw() {

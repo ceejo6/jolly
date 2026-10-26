@@ -15,7 +15,16 @@ REPO_URL="https://github.com/ceejo6/jolly.git"
 
 echo "==> Step 1: Installing Base System Packages..."
 apt-get update -qq
-apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release git samba
+apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release git samba wsdd ufw
+
+# Ensure firewall allows SMB and WSD discovery if UFW is active
+if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
+  echo "==> Opening firewall ports for SMB and WSD..."
+  ufw allow 445/tcp
+  ufw allow 139/tcp
+  ufw allow 3702/udp
+  ufw allow 8096/tcp
+fi
 
 # Install Docker Engine and Compose Plugin if missing
 if ! command -v docker >/dev/null 2>&1; then
@@ -45,7 +54,7 @@ if [[ ! -f "$TARGET_DIR/.env" ]]; then
   cp "$TARGET_DIR/.env.example" "$TARGET_DIR/.env"
 fi
 
-# Provision host storage mounts with non-restrictive container permissions
+# Provision host storage mounts
 mkdir -p "$TARGET_DIR/data/rails/storage" \
          "$TARGET_DIR/data/jellyfin/config" \
          "$TARGET_DIR/data/jellyfin/cache" \
@@ -55,22 +64,61 @@ mkdir -p "$TARGET_DIR/data/rails/storage" \
 
 chmod -R 777 "$TARGET_DIR/data"
 
-# Configure native Windows Network Share (Samba)
+# --- Auto-Provision Valid Synthetic Test Media ---
+echo "==> Provisioning valid synthetic test media for Jolly..."
+MOVIE_DIR="data/media/movies/Test Synthetic (2026)"
+mkdir -p "$MOVIE_DIR"
+
+# Generate a valid streamable 5-second MKV test file if missing or corrupted
+if [[ ! -f "$MOVIE_DIR/Test Synthetic (2026).mkv" ]] || ! ffprobe -v error "$MOVIE_DIR/Test Synthetic (2026).mkv" &>/dev/null; then
+  ffmpeg -y -f lavfi -i testsrc=duration=5:size=1280x720:rate=30 \
+            -f lavfi -i anoisesrc=duration=5,aformat=channel_layouts=stereo \
+            -c:v libx264 -preset ultrafast -pix_fmt yuv420p \
+            -c:a aac -b:a 128k \
+            "$MOVIE_DIR/Test Synthetic (2026).mkv" >/dev/null 2>&1
+fi
+
+# Ensure clean artwork assets exist so Skia doesn't throw incomplete input warnings
+if [[ ! -f "$MOVIE_DIR/poster.jpg" ]]; then
+  ffmpeg -y -f lavfi -i color=c=blue:size=200x300 -vframes 1 "$MOVIE_DIR/poster.jpg" >/dev/null 2>&1
+fi
+
+if [[ ! -f "$MOVIE_DIR/backdrop.jpg" ]]; then
+  ffmpeg -y -f lavfi -i color=c=black:size=1280x720 -vframes 1 "$MOVIE_DIR/backdrop.jpg" >/dev/null 2>&1
+fi
+
+# Configure Native Windows Network Share (Samba) with Secure Authentication
+SAMBA_USER="${SUDO_USER:-jollyadmin}"
+SAMBA_PASS="jollysecure123" # Or dynamically generated / prompted
+
+echo "==> Configuring Windows Network Share (Samba) for user: $SAMBA_USER..."
+
+# Ensure system user exists
+if ! id "$SAMBA_USER" &>/dev/null; then
+  useradd -m -s /bin/bash "$SAMBA_USER"
+fi
+
+# Set Samba password non-interactively for zero-touch deployment
+(echo "$SAMBA_PASS"; echo "$SAMBA_PASS") | smbpasswd -s -a "$SAMBA_USER"
+smbpasswd -e "$SAMBA_USER"
+
+# Write robust smb.conf share definition
 if ! grep -q "\[JollyMedia\]" /etc/samba/smb.conf; then
-  echo "==> Configuring Windows Network Share (Samba)..."
-  cat <<'SMB' >> /etc/samba/smb.conf
+  cat <<SMB >> /etc/samba/smb.conf
 
 [JollyMedia]
    path = /opt/jolly/data/media
    browseable = yes
    read only = no
-   guest ok = yes
+   guest ok = no
+   valid users = $SAMBA_USER
    create mask = 0777
    directory mask = 0777
-   force user = root
+   force user = $SAMBA_USER
 SMB
   systemctl restart smbd
-  systemctl enable smbd
+  systemctl enable smbd --now
+  systemctl enable wsdd --now
 fi
 
 echo "==> Step 3: Configuring OS Daemon (systemd)..."
