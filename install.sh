@@ -65,16 +65,16 @@ chmod -R 777 "$TARGET_DIR/data"
 
 # --- Auto-Provision Valid Synthetic Test Media ---
 echo "==> Provisioning valid synthetic test media for Jolly..."
-MOVIE_DIR="data/media/movies/Test Synthetic (2026)"
+MOVIE_DIR="$TARGET_DIR/data/media/movies/Test Synthetic (2026)"
 mkdir -p "$MOVIE_DIR"
 
-# Generate a valid streamable 5-second MKV test file if missing or corrupted
-if [[ ! -f "$MOVIE_DIR/Test Synthetic (2026).mkv" ]] || ! ffprobe -v error "$MOVIE_DIR/Test Synthetic (2026).mkv" &>/dev/null; then
+echo "# updated synthetic test media to mp4" >> install.sh
+if [[ ! -f "$MOVIE_DIR/Test Synthetic (2026).mp4" ]] || ! ffprobe -v error "$MOVIE_DIR/Test Synthetic (2026).mp4" &>/dev/null; then
   ffmpeg -y -f lavfi -i testsrc=duration=5:size=1280x720:rate=30 \
             -f lavfi -i anoisesrc=duration=5,aformat=channel_layouts=stereo \
             -c:v libx264 -preset ultrafast -pix_fmt yuv420p \
-            -c:a aac -b:a 128k \
-            "$MOVIE_DIR/Test Synthetic (2026).mkv" >/dev/null 2>&1
+            -c:a aac -b:a 128k -t 5 \
+            "$MOVIE_DIR/Test Synthetic (2026).mp4" >/dev/null 2>&1
 fi
 
 # Ensure clean artwork assets exist so Skia doesn't throw incomplete input warnings
