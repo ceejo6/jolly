@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
@@ -43,7 +45,6 @@ run_check "Jellyfin HTTP service reachable" poll_http "http://localhost:${JELLYF
 run_check "Discovery UDP 7359 port mapped" docker compose port --protocol udp jellyfin "${JELLYFIN_DISCOVERY_PORT}"
 
 # --- 4. Air-Gap Metadata Verification on Disk ---
-MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
 run_check "Synthetic video file present" test -s "$MOCK_DIR/Test Synthetic (2026).mp4"
 run_check "NFO file contains valid title" grep -q "<title>Test Synthetic</title>" "$MOCK_DIR/Test Synthetic (2026).nfo"
 run_check "NFO file contains valid plot" grep -q "<plot>.*air-gapped.*</plot>" "$MOCK_DIR/Test Synthetic (2026).nfo"
