@@ -43,7 +43,8 @@ run_check "Jellyfin HTTP service reachable" poll_http "http://localhost:${JELLYF
 run_check "Discovery UDP 7359 port mapped" docker compose port --protocol udp jellyfin "${JELLYFIN_DISCOVERY_PORT}"
 
 # --- 4. Air-Gap Metadata Verification on Disk ---
-run_check "Synthetic video file present" test -s "$MOCK_DIR/Test Synthetic (2026).mkv"
+MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
+run_check "Synthetic video file present" test -s "$MOCK_DIR/Test Synthetic (2026).mp4"
 run_check "NFO file contains valid title" grep -q "<title>Test Synthetic</title>" "$MOCK_DIR/Test Synthetic (2026).nfo"
 run_check "NFO file contains valid plot" grep -q "<plot>.*air-gapped.*</plot>" "$MOCK_DIR/Test Synthetic (2026).nfo"
 run_check "Poster artwork fixture present" test -s "$MOCK_DIR/poster.jpg"
