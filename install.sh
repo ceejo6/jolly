@@ -15,8 +15,7 @@ REPO_URL="https://github.com/ceejo6/jolly.git"
 
 echo "==> Step 1: Installing Base System Packages..."
 apt-get update -qq
-apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release git samba wsdd ufw
-
+apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release git samba wsdd ufw ffmpeg
 # Ensure firewall allows SMB and WSD discovery if UFW is active
 if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
   echo "==> Opening firewall ports for SMB and WSD..."
