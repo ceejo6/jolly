@@ -3,6 +3,8 @@ set -Eeuo pipefail
 MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
 
 MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
+MOCK_DIR="${MOCK_DIR:-/tmp/jolly-mock}"
+JELLYFIN_DISCOVERY_PORT="${JELLYFIN_DISCOVERY_PORT:-7359}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
