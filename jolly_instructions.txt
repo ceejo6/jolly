@@ -124,12 +124,17 @@ files directly from your Windows desktop or laptop:
    \\<server-ip>\JollyMedia
    (Example: \\192.168.1.150\JollyMedia)
 
-3. A Windows folder will open displaying "movies" and "tv".
-4. Drag and drop any movie into the "movies" folder.
+3. When Windows prompts you for network credentials, sign in with:
+   - Username: jollyadmin
+   - Password: jollysecure123
+   *(Check "Remember my credentials" so it connects automatically next time)*
+
+4. A Windows folder will open displaying "movies" and "tv".
+5. Drag and drop any movie into the "movies" folder.
    Recommended format:
    movies\Interstellar (2014)\Interstellar (2014).mkv
 
-5. Refresh your library:
+6. Refresh your library:
    In your Jellyfin web interface (http://<server-ip>:8096), go to:
    Dashboard -> Libraries -> click the three dots on Movies -> Scan Library.
    The movie will appear on your phone, PC, and TV immediately.
