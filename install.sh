@@ -68,7 +68,6 @@ echo "==> Provisioning valid synthetic test media for Jolly..."
 MOVIE_DIR="$TARGET_DIR/data/media/movies/Test Synthetic (2026)"
 mkdir -p "$MOVIE_DIR"
 
-echo "# updated synthetic test media to mp4" >> install.sh
 if [[ ! -f "$MOVIE_DIR/Test Synthetic (2026).mp4" ]] || ! ffprobe -v error "$MOVIE_DIR/Test Synthetic (2026).mp4" &>/dev/null; then
   ffmpeg -y -f lavfi -i testsrc=duration=5:size=1280x720:rate=30 \
             -f lavfi -i anoisesrc=duration=5,aformat=channel_layouts=stereo \
@@ -130,6 +129,31 @@ systemctl enable jolly.service
 echo "==> Step 4: Building & Launching Appliance..."
 docker compose build
 systemctl restart jolly.service
+
+# --- Auto-provision Mock Media Fixtures for Acceptance Testing ---
+echo "==> Provisioning synthetic test fixtures in /tmp/jolly-mock..."
+mkdir -p /tmp/jolly-mock
+
+# Generate valid video fixture if missing
+if [ ! -s "/tmp/jolly-mock/Test Synthetic (2026).mp4" ]; then
+    ffmpeg -y -f lavfi -i color=c=blue:s=1280x720:d=2 -c:v libx264 -t 2 "/tmp/jolly-mock/Test Synthetic (2026).mp4" >/dev/null 2>&1
+fi
+
+# Generate NFO metadata fixture if missing
+if [ ! -s "/tmp/jolly-mock/Test Synthetic (2026).nfo" ]; then
+    cat << 'EOF' > "/tmp/jolly-mock/Test Synthetic (2026).nfo"
+<title>Test Synthetic</title>
+<plot>This is an air-gapped test media file.</plot>
+EOF
+fi
+
+# Generate artwork fixtures if missing
+if [ ! -s "/tmp/jolly-mock/poster.jpg" ]; then
+    ffmpeg -y -f lavfi -i color=c=red:s=100x100 -frames:v 1 "/tmp/jolly-mock/poster.jpg" >/dev/null 2>&1
+fi
+if [ ! -s "/tmp/jolly-mock/backdrop.jpg" ]; then
+    ffmpeg -y -f lavfi -i color=c=black:s=100x100 -frames:v 1 "/tmp/jolly-mock/backdrop.jpg" >/dev/null 2>&1
+fi
 
 echo "==> Step 5: Executing Verification Acceptance Gate..."
 "$TARGET_DIR/scripts/test-1.0.sh"
